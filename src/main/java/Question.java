@@ -8,6 +8,7 @@ public class Question {
 
     private static final String HOW_OLD_QUESTION = "How old is";
     private static final String BIRTHDATE_QUESTION = "What is the birth name of";
+    private static final float DAYS_IN_YEAR = 365.25f;
 
     public static String ask(String question) throws UnknownQuestionException {
 
@@ -25,7 +26,6 @@ public class Question {
         String searchTerm = question.substring(HOW_OLD_QUESTION.length() + 1)
                 .replaceAll(" ", "_");
 
-        // TODO see if we can just use age ontology rather than dob ontology
         String queryString = "prefix dbr: <http://dbpedia.org/resource/>\n" +
                 "prefix dbp: <http://dbpedia.org/property/>\n" +
                 "prefix dbo: <http://dbpedia.org/ontology/>\n" +
@@ -49,7 +49,7 @@ public class Question {
             DateTime dobDateTime = formatter.parseDateTime(dob);
 
             Duration timeDifference = new Duration(dobDateTime , new DateTime());
-            int years = (int) (timeDifference.getStandardDays() / 365.25);
+            int years = (int) (timeDifference.getStandardDays() / DAYS_IN_YEAR);
 
             return Integer.toString(years);
         }
