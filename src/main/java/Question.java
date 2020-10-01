@@ -23,8 +23,7 @@ public class Question {
     }
 
     private static String askAgeQuestion(String question) {
-        String searchTerm = question.substring(HOW_OLD_QUESTION.length() + 1)
-                .replaceAll(" ", "_");
+        String searchTerm = sanitizeSearchTerm(question.substring(HOW_OLD_QUESTION.length() + 1));
 
         String queryString = "prefix dbr: <http://dbpedia.org/resource/>\n" +
                 "prefix dbp: <http://dbpedia.org/property/>\n" +
@@ -56,10 +55,7 @@ public class Question {
     }
 
     private static String askBirthdateQuestion(String question) {
-        String searchTerm = question.substring(BIRTHDATE_QUESTION.length() + 1)
-                .replaceAll("\\?", "") // don't care about question mark at end
-                .trim() // don't care about whitespace before/after, e.g. "...Blair ?"
-                .replaceAll(" ", "_");
+        String searchTerm = sanitizeSearchTerm(question.substring(BIRTHDATE_QUESTION.length() + 1));
 
         String queryString = "prefix dbr: <http://dbpedia.org/resource/>\n" +
                 "prefix dbp: <http://dbpedia.org/property/>\n" +
@@ -81,5 +77,12 @@ public class Question {
 
             return next.getLiteral("name").getString(); // e.g. "Anthony Charles Lynton Blair"
         }
+    }
+
+    private static String sanitizeSearchTerm(String searchTerm) {
+        return searchTerm
+                .replaceAll("\\?", "") // don't care about question mark at end
+                .trim() // don't care about whitespace before/after, e.g. "...Blair ?"
+                .replaceAll(" ", "_"); // query needs spaces formatted as underscores
     }
 }
