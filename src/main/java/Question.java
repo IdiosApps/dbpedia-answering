@@ -56,11 +56,30 @@ public class Question {
     }
 
     private static String askBirthdateQuestion(String question) {
-        String searchTerm = question.substring(BIRTHDATE_QUESTION.length())
+        String searchTerm = question.substring(BIRTHDATE_QUESTION.length() + 1)
+                .replaceAll("\\?", "") // don't care about question mark at end
+                .trim() // don't care about whitespace before/after, e.g. "...Blair ?"
                 .replaceAll(" ", "_");
 
-        // TODO implement
+        String queryString = "prefix dbr: <http://dbpedia.org/resource/>\n" +
+                "prefix dbp: <http://dbpedia.org/property/>\n" +
+                "prefix dbo: <http://dbpedia.org/ontology/>\n" +
+                "SELECT ?name\n" +
+                "FROM <http://dbpedia.org>\n" +
+                "WHERE {\n" +
+                "dbr:" + searchTerm +" ?p ?name .\n" +
+                "FILTER (?p IN (dbp:birthname, dbp:birthName, dbo:birthName,dbo:birthname) )\n" +
+                "} LIMIT 1";
 
-        return "stub";
+        // force syntaxARQ as default Jena syntax standard doesn't support a used syntax feature
+        Query query = QueryFactory.create(queryString, Syntax.syntaxARQ);
+
+        try (QueryExecution queryExecution = QueryExecutionFactory.sparqlService("http://dbpedia.org/sparql",  query)) {
+            ResultSet resultSet = queryExecution.execSelect();
+
+            QuerySolution next = resultSet.next();
+
+            return next.getLiteral("name").getString(); // e.g. "Anthony Charles Lynton Blair"
+        }
     }
 }
